@@ -20,6 +20,7 @@ export class StorageService {
     const storage = await this.storage.create();
     this._storage = storage;
     this.storageReady.next(true);
+    await this.ensureDocumentsFolderExists();
   }
 
   private async waitForStorage(): Promise<void> {
@@ -33,9 +34,26 @@ export class StorageService {
     this.encryptionKey = CryptoJS.SHA256(password).toString();
   }
 
+  private async ensureDocumentsFolderExists() {
+    try {
+      await Filesystem.readdir({
+        path: 'documents',
+        directory: Directory.Documents
+      });
+    } catch (e) {
+      // If the folder doesn't exist, create it
+      await Filesystem.mkdir({
+        path: 'documents',
+        directory: Directory.Documents,
+        recursive: true
+      });
+    }
+  }
+
   async saveDocument(name: string, fileData: string, mimeType: string): Promise<void> {
     await this.waitForStorage();
     try {
+      await this.ensureDocumentsFolderExists();
       const encryptedData = CryptoJS.AES.encrypt(fileData, this.encryptionKey).toString();
       await this._storage?.set(name, JSON.stringify({ encryptedData, mimeType }));
 
@@ -80,6 +98,7 @@ export class StorageService {
   async getAllDocuments(): Promise<string[]> {
     await this.waitForStorage();
     try {
+      await this.ensureDocumentsFolderExists();
       const keys = await this._storage?.keys() ?? [];
       const filesystemDocs = await Filesystem.readdir({
         path: 'documents',
