@@ -7,21 +7,45 @@ import { AlertController } from '@ionic/angular';
 @Component({
   selector: 'app-login',
   template: `
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Login</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <form (ngSubmit)="login()">
-        <ion-item>
-          <ion-label position="floating">Password</ion-label>
-          <ion-input type="password" [(ngModel)]="password" name="password" required></ion-input>
-        </ion-item>
-        <ion-button expand="block" type="submit" [disabled]="!password">Login</ion-button>
-      </form>
+    <ion-content class="ion-padding custom-background">
+      <div class="flex-center">
+        <ion-card class="custom-card">
+          <img src="/assets/splash.png" alt="Secure Wallet Logo" class="card-image">
+          <ion-card-header>
+            <ion-card-title class="ion-text-center">Secure Wallet</ion-card-title>
+            <ion-card-subtitle class="ion-text-center">Inicia sesión para acceder</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <form (ngSubmit)="login()">
+              <ion-item>
+                <ion-label position="floating">Contraseña</ion-label>
+                <ion-input type="password" [(ngModel)]="password" name="password" required class="custom-input"></ion-input>
+              </ion-item>
+              <ion-button expand="block" type="submit" class="custom-button ion-margin-top">
+                Iniciar Sesión
+              </ion-button>
+            </form>
+          </ion-card-content>
+        </ion-card>
+      </div>
     </ion-content>
-  `
+  `,
+  styles: [`
+    .flex-center {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    .card-image {
+      margin: 20px auto;
+      display: block;
+    }
+    ion-card {
+      width: 100%;
+      max-width: 400px;
+    }
+  `]
 })
 export class LoginPage {
   password: string = '';
@@ -34,7 +58,7 @@ export class LoginPage {
   ) {}
 
   async login() {
-    try {
+      try {
       if (await this.authService.login(this.password)) {
         this.storageService.setEncryptionKey(this.password);
         this.router.navigate(['/home']);
