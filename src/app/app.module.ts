@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { DocumentViewerComponent } from './document/document.page'; // Asegúrate de que la ruta sea correcta
 
+
 @NgModule({
   declarations: [AppComponent, DocumentViewerComponent],
   imports: [

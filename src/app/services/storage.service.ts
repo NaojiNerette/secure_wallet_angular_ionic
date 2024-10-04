@@ -125,4 +125,51 @@ export class StorageService {
       throw error;
     }
   }
+
+  async saveNote(title: string, content: string): Promise<void> {
+    await this.waitForStorage();
+    try {
+      const encryptedContent = CryptoJS.AES.encrypt(content, this.encryptionKey).toString();
+      await this._storage?.set(`note_${title}`, JSON.stringify({ title, encryptedContent }));
+    } catch (error) {
+      console.error('Save note error:', error);
+      throw error;
+    }
+  }
+
+  async getNote(title: string): Promise<string | null> {
+    await this.waitForStorage();
+    try {
+      const storedData = await this._storage?.get(`note_${title}`);
+      if (storedData) {
+        const { encryptedContent } = JSON.parse(storedData);
+        return CryptoJS.AES.decrypt(encryptedContent, this.encryptionKey).toString(CryptoJS.enc.Utf8);
+      }
+      return null;
+    } catch (error) {
+      console.error('Get note error:', error);
+      throw error;
+    }
+  }
+
+  async getAllNotes(): Promise<string[]> {
+    await this.waitForStorage();
+    try {
+      const keys = await this._storage?.keys() ?? [];
+      return keys.filter(key => key.startsWith('note_')).map(key => key.slice(5));
+    } catch (error) {
+      console.error('Get all notes error:', error);
+      throw error;
+    }
+  }
+
+  async deleteNote(title: string): Promise<void> {
+    await this.waitForStorage();
+    try {
+      await this._storage?.remove(`note_${title}`);
+    } catch (error) {
+      console.error('Delete note error:', error);
+      throw error;
+    }
+  }
 }
